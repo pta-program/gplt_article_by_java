@@ -1,0 +1,3 @@
+import java.util.*;
+/** L1-104：对行、列、九宫格各自以布尔数组检查 1..9 是否恰好各出现一次。 */
+public class Main {static boolean ok(int[] a){boolean[]v=new boolean[10];for(int x:a)if(x<1||x>9||v[x])return false;else v[x]=true;return true;}public static void main(String[]z){Scanner s=new Scanner(System.in);for(int t=s.nextInt();t-->0;){int[][]a=new int[9][9];for(int i=0;i<9;i++)for(int j=0;j<9;j++)a[i][j]=s.nextInt();boolean q=true;for(int i=0;i<9;i++){if(!ok(a[i]))q=false;int[]c=new int[9];for(int j=0;j<9;j++)c[j]=a[j][i];if(!ok(c))q=false;}for(int x=0;x<9;x+=3)for(int y=0;y<9;y+=3){int[]c=new int[9];for(int i=0;i<3;i++)for(int j=0;j<3;j++)c[i*3+j]=a[x+i][y+j];if(!ok(c))q=false;}System.out.println(q?1:0);}}}
