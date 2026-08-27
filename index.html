@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPLT Java 题解</title>
+  <meta name="description" content="GPLT L1、L2、L3 Java 题解文档，共 225 道题目。">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('gplt-theme');
+        var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.dataset.theme = 'dark';
+      } catch (error) {
+        // 隐私模式下无法访问 localStorage 时，继续使用默认主题。
+      }
+    }());
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <style>
+    :root {
+      --theme-color: #6a5acd;
+      --sidebar-width: 350px;
+      --content-max-width: 960px;
+      --page-bg: #ffffff;
+      --surface: #ffffff;
+      --text: #2c3e50;
+      --muted: #718096;
+      --border: #e8eaf2;
+      --code-bg: #f6f7fc;
+      --code-text: #263238;
+      --quote-bg: #f7f5ff;
+      --sidebar-bg: #fbfbfe;
+      --sidebar-hover: #f0edff;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --page-bg: #12131a;
+      --surface: #1c1f2e;
+      --text: #e6e8f2;
+      --muted: #a7acc0;
+      --border: #2a2f4a;
+      --code-bg: #171a27;
+      --code-text: #d8dbea;
+      --quote-bg: #20203a;
+      --sidebar-bg: #171a27;
+      --sidebar-hover: #29264a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      background: var(--page-bg) !important;
+      color: var(--text) !important;
+    }
+
+    body,
+    .markdown-section,
+    .markdown-section strong,
+    .markdown-section em,
+    .markdown-section p,
+    .markdown-section li,
+    .markdown-section table { color: var(--text); }
+
+    .markdown-section { max-width: var(--content-max-width); }
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3,
+    .markdown-section h4,
+    .markdown-section h5,
+    .markdown-section h6 { color: var(--text); }
+
+    .markdown-section a { color: #6a5acd; }
+    html[data-theme="dark"] .markdown-section a { color: #a99dff; }
+
+    .markdown-section blockquote {
+      background: var(--quote-bg);
+      border-left-color: #6a5acd;
+    }
+
+    .markdown-section code,
+    .markdown-section pre > code {
+      background: var(--code-bg);
+      color: var(--code-text);
+    }
+
+    .markdown-section pre {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--code-bg);
+      box-shadow: 0 8px 24px rgba(106, 90, 205, 0.06);
+    }
+
+    .markdown-section table { display: table; width: 100%; }
+    .markdown-section tr { border-color: var(--border); }
+    .markdown-section th { background: var(--sidebar-hover); }
+
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right-color: var(--border);
+      overflow-y: auto;
+    }
+
+    .sidebar-nav { padding: 18px 14px 36px; }
+    .sidebar-nav > ul > li > strong {
+      display: block;
+      margin: 18px 10px 8px;
+      color: var(--text);
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+    .sidebar-nav li { margin: 0; }
+    .sidebar-nav a {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      padding: 5px 10px;
+      border-radius: 7px;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav .app-sub-sidebar li > a:hover {
+      background: var(--sidebar-hover);
+      color: var(--theme-color);
+    }
+    .sidebar-nav .app-sub-sidebar li > a { padding-left: 22px; }
+    .sidebar-nav ul li ul { padding: 0; }
+
+    .search .search input {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .search .search .search-keyword { color: var(--theme-color); }
+    .search .search .search-keyword,
+    .search .search .search-keyword:hover { background: var(--sidebar-hover); }
+
+    .pagination-item a { color: var(--theme-color); }
+    .docsify-pagination-container { border-color: var(--border); }
+
+    .darklight-btn {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 9999;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      color: var(--text);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+      cursor: pointer;
+      font-size: 19px;
+      line-height: 1;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      backdrop-filter: blur(12px);
+    }
+    .darklight-btn:hover {
+      transform: translateY(-2px) rotate(8deg);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+    }
+    .darklight-btn:focus-visible {
+      outline: 3px solid rgba(106, 90, 205, .4);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 300px; }
+      .darklight-btn { right: 16px; bottom: 16px; }
+    }
+
+    @supports not (background: color-mix(in srgb, white 50%, transparent)) {
+      .darklight-btn { background: var(--surface); }
+    }
+  </style>
+</head>
+<body>
+  <button class="darklight-btn" id="darklight-toggle" type="button" aria-label="切换暗黑模式" title="切换暗黑模式">🌙</button>
+  <div id="app">正在加载文档…</div>
+
+  <script>
+    window.$docsify = {
+      name: 'GPLT · Java 题解',
+      repo: 'https://github.com/Zonkidd-Shao/gplt_article_by_java',
+      homepage: 'README.md',
+      loadSidebar: true,
+      alias: { '/.*/_sidebar.md': '/_sidebar.md' },
+      subMaxLevel: 0,
+      auto2top: true,
+      relativePath: false,
+      mergeNavbar: true,
+      search: {
+        placeholder: '🔍 搜索题号 / 标题 / 关键词',
+        depth: 4,
+        noData: '没有找到结果',
+        paths: 'auto'
+      },
+      pagination: {
+        previousText: '上一题',
+        nextText: '下一题',
+        crossChapter: true,
+        crossChapterText: true
+      },
+      copyCode: { buttonText: '复制', errorText: '复制失败', successText: '已复制' },
+      count: { countable: true, language: 'chinese' },
+      themeColor: '#6a5acd',
+      notFoundPage: true
+    };
+
+    (function () {
+      var button = document.getElementById('darklight-toggle');
+      var root = document.documentElement;
+
+      function isDark() { return root.dataset.theme === 'dark'; }
+      function updateButton() {
+        var dark = isDark();
+        button.textContent = dark ? '☀️' : '🌙';
+        button.title = dark ? '切换浅色模式' : '切换暗黑模式';
+        button.setAttribute('aria-label', button.title);
+      }
+      function setTheme(dark, remember) {
+        root.dataset.theme = dark ? 'dark' : 'light';
+        if (remember) {
+          try { localStorage.setItem('gplt-theme', dark ? 'dark' : 'light'); } catch (error) {}
+        }
+        updateButton();
+      }
+
+      button.addEventListener('click', function () { setTheme(!isDark(), true); });
+      document.addEventListener('keydown', function (event) {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd') {
+          event.preventDefault();
+          setTheme(!isDark(), true);
+        }
+      });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (event) {
+        try {
+          if (!localStorage.getItem('gplt-theme')) setTheme(event.matches, false);
+        } catch (error) {}
+      });
+      updateButton();
+    }());
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/countable@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-count@1/dist/countable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+</body>
+</html>
