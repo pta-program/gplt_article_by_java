@@ -200,6 +200,58 @@
       outline-offset: 1px;
     }
     .sidebar-section.is-collapsed > ul { display: none; }
+
+    .sidebar-topic {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .sidebar-topic > .sidebar-topic-link {
+      flex: 1 1 calc(100% - 28px);
+      min-width: 0;
+    }
+    .sidebar-topic-toggle {
+      flex: 0 0 24px;
+      width: 24px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .sidebar-topic-toggle::before { content: '▸'; }
+    .sidebar-topic:not(.is-collapsed) > .sidebar-topic-toggle::before { content: '▾'; }
+    .sidebar-topic-toggle:hover,
+    .sidebar-topic-toggle:focus-visible {
+      background: var(--sidebar-hover);
+      color: var(--theme-color);
+    }
+    .sidebar-topic-toggle:focus-visible {
+      outline: 2px solid rgba(106, 90, 205, .4);
+      outline-offset: 1px;
+    }
+    .sidebar-topic > ul {
+      flex: 0 0 100%;
+      margin: 0 0 5px;
+      padding-left: 0 !important;
+      border-left: 1px solid var(--border);
+    }
+    .sidebar-topic.is-collapsed > ul { display: none; }
+    .sidebar-heading a {
+      padding: 3px 8px 3px 22px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .sidebar-heading-level-3 a,
+    .sidebar-heading-level-4 a,
+    .sidebar-heading-level-5 a,
+    .sidebar-heading-level-6 a { padding-left: 34px; }
+    .sidebar-heading a:hover { color: var(--theme-color); }
     .sidebar-nav li { margin: 0; }
     .sidebar-nav a {
       display: block;
@@ -400,6 +452,116 @@
           toggle.addEventListener('click', function () {
             setSectionCollapsed(!item.classList.contains('is-collapsed'), true);
           });
+        });
+
+        var topicIndex = 0;
+        document.querySelectorAll('.sidebar-section > ul > li').forEach(function (item) {
+          var link = item.querySelector(':scope > a');
+          if (!link || item.dataset.topicReady === 'true') return;
+
+          var topicKey = link.getAttribute('href');
+          var list = document.createElement('ul');
+          var toggle = document.createElement('button');
+          var topicId = 'sidebar-topic-' + (++topicIndex);
+          var storedTopics;
+
+          try { storedTopics = JSON.parse(localStorage.getItem('gplt-sidebar-topics') || '{}'); }
+          catch (error) { storedTopics = {}; }
+
+          item.classList.add('sidebar-topic', 'is-collapsed');
+          link.classList.add('sidebar-topic-link');
+          toggle.type = 'button';
+          toggle.className = 'sidebar-topic-toggle';
+          toggle.setAttribute('aria-label', '展开题目标题');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-controls', topicId);
+          list.id = topicId;
+          item.insertBefore(toggle, link);
+          item.appendChild(list);
+          item.dataset.topicReady = 'true';
+
+          function saveTopicState(collapsed) {
+            try {
+              storedTopics[topicKey] = collapsed;
+              localStorage.setItem('gplt-sidebar-topics', JSON.stringify(storedTopics));
+            } catch (error) {}
+          }
+
+          function docsifySlug(text, usedIds) {
+            var punctuation = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g;
+            var slug = text.trim()
+              .replace(/[A-Z]+/g, function (value) { return value.toLowerCase(); })
+              .replace(/<[^>]+>/g, '')
+              .replace(punctuation, '')
+              .replace(/\s/g, '-')
+              .replace(/-+/g, '-')
+              .replace(/^(\d)/, '_$1');
+            var count = usedIds[slug] || 0;
+            usedIds[slug] = count + 1;
+            return count ? slug + '-' + count : slug;
+          }
+
+          function appendHeadings(source) {
+            var lines = source.replace(/\r/g, '').split('\n');
+            var inFence = false;
+            var usedIds = {};
+            lines.forEach(function (line) {
+              if (/^\s{0,3}(```|~~~)/.test(line)) {
+                inFence = !inFence;
+                return;
+              }
+              if (inFence) return;
+              var match = line.match(/^\s{0,3}(#{2,6})\s+(.+?)\s*$/);
+              if (!match) return;
+              var label = match[2].replace(/\s+#+\s*$/, '').trim();
+              var slug = docsifySlug(label, usedIds);
+              var entry = document.createElement('li');
+              var headingLink = document.createElement('a');
+              entry.className = 'sidebar-heading sidebar-heading-level-' + match[1].length;
+              headingLink.textContent = label;
+              headingLink.href = link.getAttribute('href') + '#' + encodeURIComponent(slug);
+              entry.appendChild(headingLink);
+              list.appendChild(entry);
+            });
+            if (!list.children.length) {
+              var empty = document.createElement('li');
+              empty.className = 'sidebar-heading';
+              empty.textContent = '该页面没有可用的子标题';
+              list.appendChild(empty);
+            }
+            item.dataset.headingsLoaded = 'true';
+          }
+
+          function loadHeadings() {
+            if (item.dataset.headingsLoaded === 'true' || item.dataset.headingsLoading === 'true') return;
+            item.dataset.headingsLoading = 'true';
+            fetch(new URL(link.getAttribute('href'), document.baseURI).href, { cache: 'force-cache' })
+              .then(function (response) {
+                if (!response.ok) throw new Error('Unable to load article');
+                return response.text();
+              })
+              .then(appendHeadings)
+              .catch(function () {
+                var errorItem = document.createElement('li');
+                errorItem.className = 'sidebar-heading';
+                errorItem.textContent = '标题加载失败，请重试';
+                list.appendChild(errorItem);
+              })
+              .finally(function () { delete item.dataset.headingsLoading; });
+          }
+
+          function setTopicCollapsed(collapsed, remember) {
+            item.classList.toggle('is-collapsed', collapsed);
+            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            toggle.setAttribute('aria-label', collapsed ? '展开题目标题' : '收起题目标题');
+            if (!collapsed) loadHeadings();
+            if (remember) saveTopicState(collapsed);
+          }
+
+          toggle.addEventListener('click', function () {
+            setTopicCollapsed(!item.classList.contains('is-collapsed'), true);
+          });
+          setTopicCollapsed(storedTopics[topicKey] !== false, false);
         });
       }
 
