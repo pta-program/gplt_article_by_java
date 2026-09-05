@@ -11,44 +11,42 @@
         var saved = localStorage.getItem('gplt-theme');
         var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (dark) document.documentElement.dataset.theme = 'dark';
-        if (localStorage.getItem('gplt-sidebar-collapsed') === 'true') {
-          document.documentElement.dataset.sidebarCollapsed = 'true';
-        }
       } catch (error) {
         // 隐私模式下无法访问 localStorage 时，继续使用默认主题。
       }
     }());
   </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar.min.css">
   <style>
     :root {
-      --theme-color: #6a5acd;
-      --sidebar-width: 350px;
-      --content-max-width: 960px;
-      --page-bg: #ffffff;
+      --theme-color: #6d5dfc;
+      --sidebar-width: 300px;
+      --content-max-width: 1040px;
+      --page-bg: #f7f8fc;
       --surface: #ffffff;
-      --text: #2c3e50;
-      --muted: #718096;
-      --border: #e8eaf2;
-      --code-bg: #f6f7fc;
-      --code-text: #263238;
-      --quote-bg: #f7f5ff;
+      --text: #25283a;
+      --muted: #737890;
+      --border: #e6e8f1;
+      --code-bg: #f4f5fa;
+      --code-text: #272a3b;
+      --quote-bg: #f1f2fa;
       --sidebar-bg: #fbfbfe;
-      --sidebar-hover: #f0edff;
+      --sidebar-hover: #eeecff;
     }
 
     html[data-theme="dark"] {
       color-scheme: dark;
-      --page-bg: #12131a;
-      --surface: #1c1f2e;
+      --page-bg: #11131d;
+      --surface: #191c29;
       --text: #e6e8f2;
-      --muted: #a7acc0;
-      --border: #2a2f4a;
-      --code-bg: #171a27;
-      --code-text: #d8dbea;
-      --quote-bg: #20203a;
-      --sidebar-bg: #171a27;
-      --sidebar-hover: #29264a;
+      --muted: #a4a9bd;
+      --border: #2d3348;
+      --code-bg: #111521;
+      --code-text: #e3e7f2;
+      --quote-bg: #222638;
+      --sidebar-bg: #151824;
+      --sidebar-hover: #302d58;
     }
 
     * { box-sizing: border-box; }
@@ -319,10 +317,79 @@
     @supports not (background: color-mix(in srgb, white 50%, transparent)) {
       .darklight-btn { background: var(--surface); }
     }
+    /* 与 C++ 题解库保持一致的侧栏布局 */
+    .sidebar {
+      padding: 40px 0 32px;
+      width: var(--sidebar-width);
+    }
+    .sidebar-nav {
+      line-height: 2em;
+      padding: 0 0 40px;
+    }
+    .sidebar-nav ul { margin: 0 0 0 15px; }
+    .sidebar-nav > ul > li { margin: 6px 0; }
+    .sidebar-nav > ul > li > strong {
+      display: block;
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: .02em;
+    }
+    .sidebar-nav > ul > li > p {
+      display: block;
+      margin: 0;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+    .sidebar-nav a {
+      border-radius: 0;
+      font-size: 14px;
+      line-height: inherit;
+      padding: 0;
+      transition: color .18s ease;
+      white-space: nowrap;
+    }
+    .sidebar-nav a:hover {
+      background: transparent;
+      text-decoration: underline;
+    }
+    .sidebar-nav li.active > a {
+      border-right: 2px solid var(--theme-color);
+      font-weight: 650;
+      text-decoration: none;
+    }
+    .sidebar-nav ul li ul { padding: 0; }
+    .sidebar-nav .page-toc {
+      border-left: 1px solid var(--border);
+      margin: 2px 0 4px 8px;
+      padding: 2px 0 2px 8px;
+    }
+    .sidebar-nav .page-toc > li { margin: 0; padding-left: 0; }
+    .sidebar-nav .page-toc > li > a {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.6;
+      padding: 5px 9px;
+      white-space: normal;
+    }
+    .sidebar-nav .page-toc > li[data-level="2"] > a { padding-left: 17px; }
+    .sidebar-nav .page-toc > li[data-level="3"] > a { padding-left: 25px; }
+    .sidebar-nav .page-toc > li[data-level="4"] > a { padding-left: 33px; }
+    .sidebar-nav .page-toc > li[data-level="5"] > a { padding-left: 41px; }
+    .sidebar-nav .page-toc > li[data-level="6"] > a { padding-left: 49px; }
+    .sidebar-nav .page-toc > li > a:hover,
+    .sidebar-nav .page-toc > li.active > a {
+      background: var(--sidebar-hover);
+      color: var(--theme-color);
+      text-decoration: none;
+    }
+    .content {
+      left: var(--sidebar-width);
+      padding-top: 26px;
+    }
   </style>
 </head>
 <body>
-  <button class="sidebar-collapse-btn" id="sidebar-collapse-toggle" type="button" aria-label="收起侧栏" title="收起侧栏">‹</button>
   <button class="darklight-btn" id="darklight-toggle" type="button" aria-label="切换暗黑模式" title="切换暗黑模式">🌙</button>
   <div id="app">正在加载文档…</div>
 
@@ -334,6 +401,7 @@
       loadSidebar: true,
       alias: { '/.*/_sidebar.md': '/_sidebar.md' },
       subMaxLevel: 0,
+      sidebarDisplayLevel: 2,
       auto2top: true,
       relativePath: false,
       mergeNavbar: true,
@@ -351,8 +419,37 @@
       },
       copyCode: { buttonText: '复制', errorText: '复制失败', successText: '已复制' },
       count: { countable: true, language: 'chinese' },
-      themeColor: '#6a5acd',
-      notFoundPage: true
+      themeColor: '#6d5dfc',
+      notFoundPage: true,
+      plugins: [function (hook, vm) {
+        hook.doneEach(function () {
+          document.querySelectorAll('.sidebar-nav .page-toc').forEach(function (toc) {
+            toc.remove();
+          });
+
+          var activeLink = document.querySelector('.sidebar-nav li.active > a, .sidebar-nav li.active > p > a');
+          if (!activeLink) return;
+          var activeItem = activeLink.closest('li');
+          var headings = Array.prototype.slice.call(document.querySelectorAll(
+            '#main h1, #main h2, #main h3, #main h4, #main h5, #main h6'
+          ));
+          if (!headings.length) return;
+
+          var toc = document.createElement('ul');
+          toc.className = 'app-sub-sidebar page-toc';
+          headings.forEach(function (heading) {
+            var item = document.createElement('li');
+            var link = document.createElement('a');
+            link.className = 'section-link';
+            item.dataset.level = heading.tagName.substring(1);
+            link.textContent = heading.textContent;
+            link.href = vm.router.toURL(vm.router.getCurrentPath(), { id: heading.id });
+            item.appendChild(link);
+            toc.appendChild(item);
+          });
+          activeItem.appendChild(toc);
+        });
+      }]
     };
 
     (function () {
@@ -389,197 +486,6 @@
       updateButton();
     }());
 
-    (function () {
-      var button = document.getElementById('sidebar-collapse-toggle');
-      var sectionStorageKey = 'gplt-sidebar-sections';
-      var root = document.documentElement;
-
-      function readSectionState() {
-        try { return JSON.parse(localStorage.getItem(sectionStorageKey) || '{}'); }
-        catch (error) { return {}; }
-      }
-
-      function saveSectionState(state) {
-        try { localStorage.setItem(sectionStorageKey, JSON.stringify(state)); }
-        catch (error) {}
-      }
-
-      function updateSidebarButton() {
-        var collapsed = document.body.classList.contains('sidebar-collapsed') || root.dataset.sidebarCollapsed === 'true';
-        button.textContent = collapsed ? '›' : '‹';
-        button.title = collapsed ? '展开侧栏' : '收起侧栏';
-        button.setAttribute('aria-label', button.title);
-      }
-
-      function setSidebarCollapsed(collapsed, remember) {
-        document.body.classList.toggle('sidebar-collapsed', collapsed);
-        root.dataset.sidebarCollapsed = collapsed ? 'true' : 'false';
-        if (remember) {
-          try { localStorage.setItem('gplt-sidebar-collapsed', collapsed ? 'true' : 'false'); } catch (error) {}
-        }
-        updateSidebarButton();
-      }
-
-      function enhanceSidebar() {
-        document.querySelectorAll('.sidebar-nav > ul > li').forEach(function (item) {
-          var heading = item.querySelector(':scope > strong');
-          var list = item.querySelector(':scope > ul');
-          if (!heading || !list || item.dataset.collapsibleReady === 'true') return;
-
-          var key = heading.textContent.trim().split(' ')[0];
-          var state = readSectionState();
-          var toggle = document.createElement('button');
-          toggle.type = 'button';
-          toggle.className = 'sidebar-section-toggle';
-          toggle.textContent = heading.textContent.trim();
-          toggle.setAttribute('aria-controls', 'sidebar-' + key);
-          list.id = 'sidebar-' + key;
-          item.classList.add('sidebar-section');
-          heading.replaceWith(toggle);
-          item.dataset.collapsibleReady = 'true';
-
-          function setSectionCollapsed(collapsed, remember) {
-            item.classList.toggle('is-collapsed', collapsed);
-            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            if (remember) {
-              var nextState = readSectionState();
-              nextState[key] = collapsed;
-              saveSectionState(nextState);
-            }
-          }
-
-          setSectionCollapsed(state[key] === true, false);
-          toggle.addEventListener('click', function () {
-            setSectionCollapsed(!item.classList.contains('is-collapsed'), true);
-          });
-        });
-
-        var topicIndex = 0;
-        document.querySelectorAll('.sidebar-section > ul > li').forEach(function (item) {
-          var link = item.querySelector(':scope > a');
-          if (!link || item.dataset.topicReady === 'true') return;
-
-          var topicKey = link.getAttribute('href');
-          var list = document.createElement('ul');
-          var toggle = document.createElement('button');
-          var topicId = 'sidebar-topic-' + (++topicIndex);
-          var storedTopics;
-
-          try { storedTopics = JSON.parse(localStorage.getItem('gplt-sidebar-topics') || '{}'); }
-          catch (error) { storedTopics = {}; }
-
-          item.classList.add('sidebar-topic', 'is-collapsed');
-          link.classList.add('sidebar-topic-link');
-          toggle.type = 'button';
-          toggle.className = 'sidebar-topic-toggle';
-          toggle.setAttribute('aria-label', '展开题目标题');
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.setAttribute('aria-controls', topicId);
-          list.id = topicId;
-          item.insertBefore(toggle, link);
-          item.appendChild(list);
-          item.dataset.topicReady = 'true';
-
-          function saveTopicState(collapsed) {
-            try {
-              storedTopics[topicKey] = collapsed;
-              localStorage.setItem('gplt-sidebar-topics', JSON.stringify(storedTopics));
-            } catch (error) {}
-          }
-
-          function docsifySlug(text, usedIds) {
-            var punctuation = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g;
-            var slug = text.trim()
-              .replace(/[A-Z]+/g, function (value) { return value.toLowerCase(); })
-              .replace(/<[^>]+>/g, '')
-              .replace(punctuation, '')
-              .replace(/\s/g, '-')
-              .replace(/-+/g, '-')
-              .replace(/^(\d)/, '_$1');
-            var count = usedIds[slug] || 0;
-            usedIds[slug] = count + 1;
-            return count ? slug + '-' + count : slug;
-          }
-
-          function appendHeadings(source) {
-            var lines = source.replace(/\r/g, '').split('\n');
-            var inFence = false;
-            var usedIds = {};
-            lines.forEach(function (line) {
-              if (/^\s{0,3}(```|~~~)/.test(line)) {
-                inFence = !inFence;
-                return;
-              }
-              if (inFence) return;
-              var match = line.match(/^\s{0,3}(#{2,6})\s+(.+?)\s*$/);
-              if (!match) return;
-              var label = match[2].replace(/\s+#+\s*$/, '').trim();
-              var slug = docsifySlug(label, usedIds);
-              var entry = document.createElement('li');
-              var headingLink = document.createElement('a');
-              entry.className = 'sidebar-heading sidebar-heading-level-' + match[1].length;
-              headingLink.textContent = label;
-              headingLink.href = link.getAttribute('href') + '#' + encodeURIComponent(slug);
-              entry.appendChild(headingLink);
-              list.appendChild(entry);
-            });
-            if (!list.children.length) {
-              var empty = document.createElement('li');
-              empty.className = 'sidebar-heading';
-              empty.textContent = '该页面没有可用的子标题';
-              list.appendChild(empty);
-            }
-            item.dataset.headingsLoaded = 'true';
-          }
-
-          function loadHeadings() {
-            if (item.dataset.headingsLoaded === 'true' || item.dataset.headingsLoading === 'true') return;
-            item.dataset.headingsLoading = 'true';
-            fetch(new URL(link.getAttribute('href'), document.baseURI).href, { cache: 'force-cache' })
-              .then(function (response) {
-                if (!response.ok) throw new Error('Unable to load article');
-                return response.text();
-              })
-              .then(appendHeadings)
-              .catch(function () {
-                var errorItem = document.createElement('li');
-                errorItem.className = 'sidebar-heading';
-                errorItem.textContent = '标题加载失败，请重试';
-                list.appendChild(errorItem);
-              })
-              .finally(function () { delete item.dataset.headingsLoading; });
-          }
-
-          function setTopicCollapsed(collapsed, remember) {
-            item.classList.toggle('is-collapsed', collapsed);
-            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            toggle.setAttribute('aria-label', collapsed ? '展开题目标题' : '收起题目标题');
-            if (!collapsed) loadHeadings();
-            if (remember) saveTopicState(collapsed);
-          }
-
-          toggle.addEventListener('click', function () {
-            setTopicCollapsed(!item.classList.contains('is-collapsed'), true);
-          });
-          setTopicCollapsed(storedTopics[topicKey] !== false, false);
-        });
-      }
-
-      button.addEventListener('click', function () {
-        var collapsed = document.body.classList.contains('sidebar-collapsed') || root.dataset.sidebarCollapsed === 'true';
-        setSidebarCollapsed(!collapsed, true);
-      });
-
-      window.$docsify.plugins = (window.$docsify.plugins || []).concat(function (hook) {
-        hook.doneEach(enhanceSidebar);
-      });
-
-      document.addEventListener('DOMContentLoaded', function () {
-        setSidebarCollapsed(root.dataset.sidebarCollapsed === 'true', false);
-        enhanceSidebar();
-      });
-      updateSidebarButton();
-    }());
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
@@ -588,6 +494,7 @@
   <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/countable@3"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-count@1/dist/countable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-c.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
